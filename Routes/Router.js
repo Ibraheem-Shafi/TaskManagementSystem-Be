@@ -1,19 +1,21 @@
 const express = require("express");
-const userController = require("./../Controllers/userController");
-const todoController = require("./../Controllers/todoController");
-const authenticateUser = require("./../Middlewares/AuthenticateUser"); // Assuming you have authentication middleware
-const router = express.Router()
+const userController = require("../Controllers/userController");
+const taskController = require("../Controllers/taskController");
+const authenticateUser = require("../Middlewares/AuthenticateUser"); // Assuming you have authentication middleware
+const router = express.Router();
 
 // User routes
 router.post('/users/register', userController.registerUser);
 router.post("/user/login", userController.userLogin);
-router.get("/user/:id", authenticateUser, userController.getUserById); // Protected route
+router.get("/users/:id", authenticateUser, userController.getUserById); // Protected route
+router.post("/users/logout", authenticateUser, userController.userLogout); // Protected route
 
-// Todo routes (protected by authenticateUser)
-router.get('/todos/:userId', authenticateUser, todoController.getTodos); // Get todos for logged-in user
-router.post('/todos', authenticateUser, todoController.createTodo); // Create todo for logged-in user
-router.put('/todo/:id', authenticateUser, todoController.editTodo); // Edit todo for logged-in user
-router.delete('/todo/delete/:id', authenticateUser, todoController.deleteTodo); // Delete todo for logged-in user
-router.patch('/todos/toggle/:id',  todoController.toggleTodo); // Toggle todo status for logged-in user
+// Task routes (protected by authenticateUser)
+router.post('/tasks', authenticateUser, taskController.createTask); // Create a new task
+router.get('/tasks/:userId', authenticateUser, taskController.getTasks); // Retrieve all tasks for the logged-in user
+router.get('/tasks/:id', authenticateUser, taskController.getTaskById); // Retrieve a specific task
+router.put('/tasks/:id', authenticateUser, taskController.editTask); // Update a task
+router.delete('/tasks/:id', authenticateUser, taskController.deleteTask); // Delete a task
+router.patch('/tasks/toggle/:id', authenticateUser, taskController.toggleStatus); // Toggle task status for the logged-in user
 
 module.exports = router;

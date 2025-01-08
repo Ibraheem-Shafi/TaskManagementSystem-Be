@@ -25,7 +25,7 @@ const userSchema = new mongoose.Schema({
 
 userSchema.methods.generateAuthToken = async function () {
   try {
-    const newToken = jwt.sign({ _id: this._id }, SECRET_KEY, { expiresIn: '1d' });
+    const newToken = jwt.sign({ _id: this._id }, SECRET_KEY, { expiresIn: '1h' });
     this.token = this.token.concat({ token: newToken });
     await this.save();
     return newToken;
@@ -34,6 +34,6 @@ userSchema.methods.generateAuthToken = async function () {
   }
 };
 
-// User model
+// User model is being exported like this to prevent the "OverwriteModelError" that occurs if you attempt to redefine a model with the same name in the same runtime.
 const User = mongoose.models.User || mongoose.model('User', userSchema);
 module.exports = User;

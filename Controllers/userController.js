@@ -1,6 +1,7 @@
 const User = require("../Models/userSchema");
 const bcrypt = require("bcryptjs");
-const jwt = require("jsonwebtoken");
+const jwt = require('jsonwebtoken');
+const secret = process.env.SECRET_KEY;
 
 exports.registerUser = async (req, res) => {
   try {
@@ -24,11 +25,18 @@ exports.registerUser = async (req, res) => {
 
     await newUser.save();
 
-    const token = jwt.sign({ id: newUser._id }, process.env.SECRET_KEY, { expiresIn: "1h" });
+    const token = jwt.sign({ id: newUser._id }, secret, { expiresIn: "1h" });
+
+    // Set JWT token in httpOnly cookie
+    res.cookie('token', token, {
+      httpOnly: true, // Make it accessible only by HTTP requests
+      secure: process.env.NODE_ENV, // Ensure the cookie is secure in production
+      maxAge: 3600000, // 1 hour expiration
+      sameSite: 'Strict', // Optional, prevent cross-site request forgery
+    });
 
     return res.status(200).json({
       message: "User registered successfully",
-      token,
       userId: newUser._id,
     });
   } catch (error) {
@@ -37,6 +45,7 @@ exports.registerUser = async (req, res) => {
   }
 };
 
+// Login (set token in cookie)
 exports.userLogin = async (req, res) => {
   try {
     const { email, password } = req.body;
@@ -51,11 +60,18 @@ exports.userLogin = async (req, res) => {
       return res.status(401).json({ error: "Invalid password" });
     }
 
-    const token = jwt.sign({ id: user._id }, process.env.SECRET_KEY, { expiresIn: "1h" });
+    const token = jwt.sign({ id: user._id }, secret, { expiresIn: "1h" });
+
+    // Set JWT token in httpOnly cookie
+    res.cookie('token', token, {
+      httpOnly: true, // Make it accessible only by HTTP requests
+      secure: process.env.NODE_ENV === 'production', // Ensure the cookie is secure in production
+      maxAge: 3600000, // 1 hour expiration
+      sameSite: 'Strict', // Optional, prevent cross-site request forgery
+    });
 
     return res.status(200).json({
       message: "Login successful",
-      token,
       user: {
         userId: user._id,
         email: user.email,
@@ -88,6 +104,18 @@ exports.getUserById = async (req, res) => {
   }
 };
 
-exports.userLogout = (req, res) => {
-  res.status(200).json({ message: "Logout successful" });
+exports.userLogout = async (req, res) => {
+  try {
+
+    // Clear the token cookie
+    res.clearCookie('token', {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: 'Strict',
+    });
+
+    res.status(200).json({ message: "Logout successful" });
+  } catch (error) {
+    res.status(500).json({ message: "Logout failed", error });
+  }
 };
