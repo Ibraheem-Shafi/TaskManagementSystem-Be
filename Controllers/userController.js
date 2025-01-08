@@ -60,27 +60,18 @@ exports.userLogin = async (req, res) => {
       return res.status(401).json({ error: "Invalid password" });
     }
 
-    // Get the current server time in seconds
-    const currentTime = Math.floor(Date.now() / 1000);  // Convert milliseconds to seconds
-    console.log("Current Time (iat):", currentTime);  // Debugging line
+    const token = jwt.sign({ id: user._id }, secret,{expiresIn: "1hr"});
 
-    // Calculate the expiration time (current time + 1 hour in seconds)
-    const expiresIn = 3600; // 1 hour = 3600 seconds
-
-    const token = jwt.sign(
-      { id: user._id },
-      secret,
-      {
-        expiresIn: '1hr', // Set expiration time to 1 hour from current time
-      }
-    );
-
+    const decodedToken = jwt.decode(token);
+    console.log(decodedToken)
+    
     // Set JWT token in httpOnly cookie
     res.cookie('token', token, {
       httpOnly: true,  // Make it accessible only by HTTP requests
       secure: process.env.NODE_ENV === 'production',  // Ensure the cookie is secure in production
-      maxAge: expiresIn * 1000,  // Convert 1 hour into milliseconds for cookie expiration
-      // sameSite: 'Strict',  // Optional, prevent cross-site request forgery
+      maxAge: 3600000,  // Convert 1 hour into milliseconds for cookie expiration
+      sameSite: 'Strict',  // Optional, prevent cross-site request forgery
+      domain: 'localhost',
     });
 
     return res.status(200).json({
