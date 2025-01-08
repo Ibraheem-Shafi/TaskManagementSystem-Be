@@ -10,7 +10,8 @@ const app = express();
 app.use(cookieParser());
 
 app.use(cors({
-    origin: 'https://task-management-system-fe.vercel.app', // Replace with your frontend URL
+    origin: 'https://task-management-system-fe.vercel.app',
+    // origin: 'http://localhost:3000',
     credentials: true,
 }));
 
