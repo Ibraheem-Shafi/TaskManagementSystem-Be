@@ -1,25 +1,20 @@
 const jwt = require('jsonwebtoken');
-const secret = process.env.SECRET_KEY; // Ensure this is properly set in your environment
+const secret = process.env.SECRET_KEY; // Ensure this matches the key used to sign the token
 
-// Middleware to check the token from httpOnly cookies
+// Middleware to check the token
 const authenticateUser = (req, res, next) => {
-  const token = req.cookies.token; // Safely access the token from cookies
-
-    console.log(token)
-    const decodedToken = jwt.decode(token);
-    console.log(decodedToken);
-
-  if (!token) {
-    return res.status(401).json({ message: 'Access denied, no token provided' });
-  }
-
-  jwt.verify(token, secret, (err, decoded) => {
-    if (err) {
-      return res.status(401).json({ message: 'Invalid or expired token' });
+    const token = req.headers['authorization']?.split(' ')[1]; // Get token from header
+    if (!token) {
+        return res.status(401).send('Access denied, no token provided');
     }
-    req.user = decoded; // Attach decoded token payload to the request
-    next(); // Proceed to the next middleware or route handler
-  });
+
+    jwt.verify(token, secret, (err, decoded) => {
+        if (err) {
+            return res.status(401).send('Invalid or expired token');
+        }
+        req.user = decoded; // Store the decoded user info for use in other routes
+        next();
+    });
 };
 
 module.exports = authenticateUser;

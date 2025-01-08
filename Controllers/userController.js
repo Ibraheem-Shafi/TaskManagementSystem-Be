@@ -28,16 +28,17 @@ exports.registerUser = async (req, res) => {
     const token = jwt.sign({ id: newUser._id }, secret, { expiresIn: "1h" });
 
     // Set JWT token in httpOnly cookie
-    res.cookie('token', token, {
-      httpOnly: true, // Make it accessible only by HTTP requests
-      secure: process.env.NODE_ENV === 'production', // Ensure the cookie is secure in production
-      maxAge: 3600000, // 1 hour expiration
-      sameSite: 'Strict', // Optional, prevent cross-site request forgery
-    });
+    // res.cookie('token', token, {
+    //   httpOnly: true, // Make it accessible only by HTTP requests
+    //   secure: process.env.NODE_ENV === 'production', // Ensure the cookie is secure in production
+    //   maxAge: 3600000, // 1 hour expiration
+    //   sameSite: 'Strict', // Optional, prevent cross-site request forgery
+    // });
 
     return res.status(200).json({
       message: "User registered successfully",
       userId: newUser._id,
+      token: token
     });
   } catch (error) {
     console.error("Error registering user:", error);
@@ -66,13 +67,14 @@ exports.userLogin = async (req, res) => {
     console.log(decodedToken)
     
     // Set JWT token in httpOnly cookie
-    res.cookie('token', token, {
-      httpOnly: true,  // Make it accessible only by HTTP requests
-      secure: process.env.NODE_ENV === 'production',  // Ensure the cookie is secure in production
-      maxAge: 3600000,  // Convert 1 hour into milliseconds for cookie expiration
-      sameSite: 'Strict',  // Optional, prevent cross-site request forgery
-      // domain: 'localhost',
-    });
+    // res.cookie('token', token, {
+    //   httpOnly: true,  // Make it accessible only by HTTP requests
+    //   secure: process.env.NODE_ENV === 'production',  // Ensure the cookie is secure in production
+    //   maxAge: 3600000,  // Convert 1 hour into milliseconds for cookie expiration
+    //   sameSite: 'Strict',  // Optional, prevent cross-site request forgery
+    //   // domain: 'localhost',
+    // });
+    // console.log(req.cookies)
 
     return res.status(200).json({
       message: "Login successful",
@@ -80,6 +82,7 @@ exports.userLogin = async (req, res) => {
         userId: user._id,
         email: user.email,
       },
+      token: token
     });
   } catch (error) {
     console.error("Error logging in:", error);
