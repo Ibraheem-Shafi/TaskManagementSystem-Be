@@ -30,7 +30,7 @@ exports.registerUser = async (req, res) => {
     // Set JWT token in httpOnly cookie
     res.cookie('token', token, {
       httpOnly: true, // Make it accessible only by HTTP requests
-      secure: process.env.NODE_ENV, // Ensure the cookie is secure in production
+      secure: process.env.NODE_ENV === 'production', // Ensure the cookie is secure in production
       maxAge: 3600000, // 1 hour expiration
       sameSite: 'Strict', // Optional, prevent cross-site request forgery
     });
@@ -71,7 +71,7 @@ exports.userLogin = async (req, res) => {
       secure: process.env.NODE_ENV === 'production',  // Ensure the cookie is secure in production
       maxAge: 3600000,  // Convert 1 hour into milliseconds for cookie expiration
       sameSite: 'Strict',  // Optional, prevent cross-site request forgery
-      domain: 'localhost',
+      // domain: 'localhost',
     });
 
     return res.status(200).json({
@@ -114,7 +114,7 @@ exports.userLogout = async (req, res) => {
     // Clear the token cookie
     res.clearCookie('token', {
       httpOnly: true,
-      secure: process.env.NODE_ENV,
+      secure: process.env.NODE_ENV === 'production',
       sameSite: 'Strict',
     });
 
